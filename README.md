@@ -35,21 +35,41 @@ npm run dev -- --host
 
 ---
 
+### 🔧 Configuration for `server.allowedHosts`
+
+When running the **Minecraft JSON-RPC client** and **server** on different hosts, you must explicitly allow your frontend domain in Vite’s configuration.
+
+#### `vite.config.js`
+```js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  server: {
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      '0.0.0.0',
+      'rpc.mcsnapshot.com' // ✅ Add your external hostname here
+    ],
+    host: true,
+    port: 5173,
+  },
+})
+```
+
 ## Minecraft Server Configuration
 
 To enable the RPC Management server, add or update the following entries in your **`server.properties`** file:
-
-### Get Secret
-```properties
-awk -F'=' '/^management-server-secret=/{print $2}' server.properties
-```
 
 ```properties
 management-server-enabled=true
 management-server-host=0.0.0.0
 management-server-port=25585
 management-server-secret=<secret-here>
-management-server-allowed-origins=http://<server-ip>:5173,http://localhost>:5173,http://127.0.0.1:5173
+management-server-allowed-origins=http://<server-domain>:5173,http://<server-ip>:5173,http://localhost>:5173,http://127.0.0.1:5173
 management-server-tls-enabled=false
 management-server-tls-keystore=
 management-server-tls-keystore-password=
@@ -59,35 +79,29 @@ management-server-tls-keystore-password=
 If you are connecting from another host (for example, a remote machine running the WebSocket client), make sure to replace the allowed origin:
 
 ```properties
-management-server-allowed-origins=http://<server-ip>:5173,http://localhost>:5173,http://127.0.0.1:5173
+management-server-allowed-origins=http://<server-domain>:5173,http://<server-ip>:5173,http://localhost>:5173,http://127.0.0.1:5173
 ```
 - A list is optional.
 
 ---
 
-## WebSocket Connection
+#### 🌐 WebSocket URLs
 
-You can connect to the Minecraft server using either of the following protocols:
+| Environment       | Protocol | Example (Domain)                    | Example (IP)                        |
+|-------------------|-----------|-------------------------------------|-------------------------------------|
+| Development       | `ws://`   | `ws://<server-domain>:25585`     | `ws://<server-ip>:25585`        |
+| Production (TLS)  | `wss://`  | `wss://<server-domain>:25585`    | `wss://<server-ip>:25585`       |
 
-### Unsecured (Development)
-```bash
-ws://<server-ip>:25585
 
-or
+> ✅ Tip: Use `wss://` only if `management-server-tls-enabled=true` and a valid TLS certificate is configured.
 
-ws://<server-domain>:25585
+---
+
+### Get Secret
+```properties
+awk -F'=' '/^management-server-secret=/{print $2}' server.properties
 ```
-
-### Secured (Production with TLS)
-```bash
-wss://<server-ip>:25585
-
-or
-
-wss://<server-domain>:25585
-```
-
-Make sure the **`management-server-secret`** from `server.properties` is entered in your client when prompted.  
+- Make sure the **`management-server-secret`** from `server.properties` is entered in your client when prompted.  
 The connection will reject unauthenticated or cross-origin requests unless properly configured.
 
 ---
@@ -156,9 +170,9 @@ If you encounter issues connecting or maintaining the WebSocket session, review 
 
 #### 3. **CORS Error in Browser Console**
 - If using a web browser, ensure the **Origin** matches the one configured in `server.properties`.
-- Example: if hosting the app at `http://<server-ip>:5173`, your server property should read:
+- Example: if hosting the app at `http://<server-domain>:5173,http://<server-ip>:5173`, your server property should read:
   ```properties
-  management-server-allowed-origins=http://<server-ip>:5173,http://localhost>:5173,http://127.0.0.1:5173
+  management-server-allowed-origins=http://<server-domain>:5173,http://<server-ip>:5173,http://localhost>:5173,http://127.0.0.1:5173
   ```
 
 #### 4. **TLS/SSL Handshake Error**
