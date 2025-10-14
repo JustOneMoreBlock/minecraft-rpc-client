@@ -51,6 +51,12 @@ management-server-tls-keystore-password=
 ```
 - You should be able to make all these changes.
 
+
+## Get Secret
+```properties
+awk -F'=' '/^management-server-secret=/{print $2}' server.properties
+```
+
 If you are connecting from another host (for example, a remote machine running the WebSocket client), make sure to replace the allowed origin:
 
 ```properties
