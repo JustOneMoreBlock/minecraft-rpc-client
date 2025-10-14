@@ -122,7 +122,6 @@ All versioned updates and schema changes are tracked in the **`changelog/`** fol
 ### Folder Structure
 ```
 changelog/
- ├── v1.0.0.md     # Initial release (basic commands and operators)
  ├── v1.1.0.md     # Added new commands, notifications, and TLS/browser authentication
 ```
 
